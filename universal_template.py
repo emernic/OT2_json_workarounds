@@ -4,6 +4,9 @@
 This is a workaround for the fact that the new OT2 JSON schema is not officially out yet (8/23/2018)
 It effectively converts protocols made using the schema as described here: https://github.com/Opentrons/opentrons/blob/391dcebe52411c432bb6f680d8aa5952a11fe90f/shared-data/protocol-json-schema/protocol-schema.json
 into a Python protocol that can be run in the OT2 app.
+
+This version also adds the ability to read from custom container definitions in the JSON protocols (not part of official schema).
+
 To use:
 	1.) Write your JSON protocol following the schema linked above.
 	2.) Paste that JSON protocol into a file prepended with "jp=". In other words, create a file with one variable hard-coded
@@ -38,13 +41,18 @@ To use:
 #       "model":"p300_single_v1"
 #     }
 #   },
+#   "labware-definitions": [
+#     {
+#       ......a labware definition......
+#     }
+#   ],
 #   "labware":{
 #     "tiprack1Id":{
 #       "slot":"7",
 #       "model":"tiprack-200ul",
 #       "display-name":"Tip rack"
 #     },
-#     "sourcePlateId":{
+#     "custom-1.5-rack":{
 #       "slot":"10",
 #       "model":"trough-12row",
 #       "display-name":"Source (Buffer)"
@@ -192,13 +200,20 @@ DELAY_CMDS = {
 	"delay": "delay"
 }
 
+import json
 from opentrons import instruments, labware, robot
+from opentrons.data_storage import labware_definitions as ldef
 
 #TODO: validate against schema first
 #TODO: validate schema version
 
 if jp['robot']['model'] not in ROBOT_MODELS:
 	raise ValueError('Unsupported robot model: {0}. Accepted models: {1}'.formnat(jp['robot']['model'], ROBOT_MODELS))
+
+# TODO: this is not a good thing to do as this function is not a standard API endpoint.
+if jp['labware-definitions']:
+	for labware_definition in jp['labware-definitions']:
+		ldef.save_user_definition(json.dumps(labware_definition))
 
 pipette_dict = {}
 for name, pipette in jp['pipettes'].items():
