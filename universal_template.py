@@ -204,7 +204,7 @@ TEMP_CMDS = {
 }
 
 import json
-from opentrons import instruments, labware, robot
+from opentrons import instruments, labware, robot, modules
 # from opentrons.data_storage import labware_definitions as ldef
 
 #TODO: validate against schema first
@@ -240,7 +240,7 @@ for name, item in jp['labware'].items():
 
 modules_dict = {}
 for name, item in jp['modules'].items():
-	modules_dict[name] = modules.load(item['model'], item['slot'], share=True)
+	modules_dict[name] = modules.load(item['model'], item['slot'])
 
 # Merge all commands into a giant list and strip annotations
 all_commands = []
@@ -285,12 +285,12 @@ for command in all_commands:
 
 	elif method_name in TEMP_CMDS:
 		method = getattr(modules_dict[command['params']['module']], TEMP_CMDS[method_name])
-		if method_name == 'wait_for_temp':
+		if method_name == 'wait-temp':
 			method()
-		elif method_name == 'set_temperature':
+		elif method_name == 'set-temp':
 			method(command['params']['temp'])
 		else:
-			raise ValueError("Only wait_for_temp and set_temp supported for temp deck.")
+			raise ValueError("Only wait for temp and set temp supported for temp deck.")
 
 	else:
 		raise ValueError("Unkown command: {0}. Known commands: {1}".format(method_name, ASP_DISP_CMDS+TIP_CMDS+DELAY_CMDS))
