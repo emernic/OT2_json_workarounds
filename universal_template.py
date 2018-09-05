@@ -231,16 +231,16 @@ for name, pipette in jp['pipettes'].items():
 
 #TODO: share should be False, but this throws errors because of trash so it's set for true for now.
 
+modules_dict = {}
+for name, item in jp['modules'].items():
+	modules_dict[name] = modules.load(item['model'], item['slot'])
+
 labware_dict = {}
 for name, item in jp['labware'].items():
 	if "display-name" in item.keys():
 		labware_dict[name] = labware.load(item['model'], item['slot'], item['display-name'], share=True)
 	else:
 		labware_dict[name] = labware.load(item['model'], item['slot'], share=True)
-
-modules_dict = {}
-for name, item in jp['modules'].items():
-	modules_dict[name] = modules.load(item['model'], item['slot'])
 
 # Merge all commands into a giant list and strip annotations
 all_commands = []
