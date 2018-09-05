@@ -1,5 +1,3 @@
-
-
 """
 This is a workaround for the fact that the new OT2 JSON schema is not officially out yet (8/23/2018)
 It effectively converts protocols made using the schema as described here: https://github.com/Opentrons/opentrons/blob/391dcebe52411c432bb6f680d8aa5952a11fe90f/shared-data/protocol-json-schema/protocol-schema.json
@@ -202,7 +200,7 @@ DELAY_CMDS = {
 
 import json
 from opentrons import instruments, labware, robot
-from opentrons.data_storage import labware_definitions as ldef
+# from opentrons.data_storage import labware_definitions as ldef
 
 #TODO: validate against schema first
 #TODO: validate schema version
@@ -210,10 +208,10 @@ from opentrons.data_storage import labware_definitions as ldef
 if jp['robot']['model'] not in ROBOT_MODELS:
 	raise ValueError('Unsupported robot model: {0}. Accepted models: {1}'.formnat(jp['robot']['model'], ROBOT_MODELS))
 
-# TODO: this is not a good thing to do as this function is not a standard API endpoint.
-if jp['labware-definitions']:
-	for labware_definition in jp['labware-definitions']:
-		ldef.save_user_definition(json.dumps(labware_definition))
+# # TODO: this is not a good thing to do as this function is not a standard API endpoint.
+# if jp['labware-definitions']:
+# 	for labware_definition in jp['labware-definitions']:
+# 		ldef.save_user_definition(json.dumps(labware_definition))
 
 pipette_dict = {}
 for name, pipette in jp['pipettes'].items():
