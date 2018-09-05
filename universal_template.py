@@ -198,6 +198,11 @@ DELAY_CMDS = {
 	"delay": "delay"
 }
 
+TEMP_CMDS = {
+	"set-temp": "set_temperature",
+	"wait-temp": "wait_for_temp"
+}
+
 import json
 from opentrons import instruments, labware, robot
 # from opentrons.data_storage import labware_definitions as ldef
@@ -232,6 +237,10 @@ for name, item in jp['labware'].items():
 		labware_dict[name] = labware.load(item['model'], item['slot'], item['display-name'], share=True)
 	else:
 		labware_dict[name] = labware.load(item['model'], item['slot'], share=True)
+
+modules_dict = {}
+for name, item in jp['modules'].items():
+	modules_dict[name] = modules.load(item['model'], item['slot'], share=True)
 
 # Merge all commands into a giant list and strip annotations
 all_commands = []
@@ -273,6 +282,15 @@ for command in all_commands:
 			# For whatever reason, the delay command is a method for Pipette in the Python API... so we will just pick a pipette.
 			method = getattr(next(iter(pipette_dict.values())), DELAY_CMDS[method_name])
 			method(seconds=command['params']['wait'])
+
+	elif method_name in TEMP_CMDS:
+		method = getattr(modules_dict[command['params']['module']], TEMP_CMDS[method_name])
+		if method_name == 'wait_for_temp':
+			method()
+		elif method_name == 'set_temperature':
+			method(command['params']['temp'])
+		else:
+			raise ValueError("Only wait_for_temp and set_temp supported for temp deck.")
 
 	else:
 		raise ValueError("Unkown command: {0}. Known commands: {1}".format(method_name, ASP_DISP_CMDS+TIP_CMDS+DELAY_CMDS))
